@@ -34,7 +34,7 @@ window.CONFIG = {
      ATENÇÃO: isto apenas ESCONDE a tela de administração no navegador.
      Não é segurança real (veja a seção "Segurança" no LEIA-ME.md).
      Troque por uma senha sua antes de publicar. */
-  ADMIN_SENHA: "#infsj01#",
+  ADMIN_SENHA: "#infSJ01#",
 
   /* Textos da capa/rodapé (opcional — já vêm preenchidos). */
   TITULO: "Guia da Rede de Proteção Integral à Infância e à Adolescência",
