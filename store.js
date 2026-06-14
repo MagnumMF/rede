@@ -15,7 +15,8 @@
   }
 
   async function getJSON(url) {
-    var r = await fetch(url, { method: "GET", headers: jsonHeaders(), cache: "no-store" });
+    // GET sem Content-Type = requisição "simples" (não dispara preflight CORS).
+    var r = await fetch(url, { method: "GET", cache: "no-store" });
     if (!r.ok) throw new Error("Falha ao ler (" + r.status + ")");
     return r.json();
   }
