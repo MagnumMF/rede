@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Painel de Controle — Rede de Proteção · São Joaquim/SC</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#16403d">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Barra superior (botões só aparecem após o login) -->
+<div class="admin-top">
+  <div>
+    <h1>Painel de <b>Controle</b></h1>
+    <div class="sub">Rede de Proteção Integral à Infância e à Adolescência · São Joaquim/SC</div>
+  </div>
+  <div id="admin-top-actions" style="display:none;gap:10px">
+    <button class="adm-action" id="recarregar" title="Recarregar os dados do servidor">↻ Recarregar</button>
+    <button class="adm-action" id="sair">Sair</button>
+  </div>
+</div>
+
+<!-- Tela de login (gate) -->
+<div class="gate" id="gate">
+  <div class="crest" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#f0c986" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <circle cx="12" cy="10" r="2.4"/>
+    </svg>
+  </div>
+  <h2>Acesso restrito</h2>
+  <p>Informe a senha de administração para gerenciar os dados públicos das instituições e validar os pedidos de atualização.</p>
+  <div class="field">
+    <label for="senha">Senha</label>
+    <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
+  </div>
+  <button class="btn-primary" id="entrar">Entrar</button>
+  <div id="gate-msg"></div>
+  <div class="warn">
+    <b>Aviso de segurança:</b> esta senha apenas oculta a tela no navegador — não é uma proteção real.
+    Os dados administrados aqui são públicos (contatos institucionais). Veja a seção <b>Segurança</b> no
+    arquivo LEIA-ME para entender as limitações do jsonblob e o caminho para um back-end com autenticação real.
+  </div>
+</div>
+
+<!-- Painel (aparece após o login) -->
+<div class="admin-wrap" id="painel" style="display:none">
+  <nav class="tabs" id="tabs"></nav>
+  <div id="conteudo"></div>
+</div>
+
+<!-- Aviso flutuante -->
+<div id="toast"></div>
+
+<script src="config.js"></script>
+<script src="store.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

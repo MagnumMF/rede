@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Guia da Rede de Proteção — São Joaquim/SC</title>
+<meta name="description" content="Guia da Rede de Proteção Integral à Infância e à Adolescência — São Joaquim/SC. Quem é quem, onde encontrar e como acionar cada serviço.">
+<meta name="theme-color" content="#16403d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Guia da <b>Rede de Proteção</b> Integral à Infância e à Adolescência</h1>
+    <p>Quem é quem, onde encontrar e como acionar cada serviço. Toque nas laterais ou nas setas para folhear.</p>
+  </div>
+  <div class="tb-right">
+    <div class="tb-actions">
+      <button class="dl-btn" id="dl" aria-label="Baixar guia em PDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Baixar PDF</span>
+      </button>
+    </div>
+    <div class="badge">Comarca de São Joaquim · SC</div>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="scaler" id="scaler">
+    <div class="scene">
+      <div class="book" id="book">
+        <div class="loading"><div class="spinner"></div>Carregando o guia…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="nav" id="prev" aria-label="Página anterior" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="counter"><b id="cur">Capa</b> <span id="tot"></span></div>
+  <button class="nav" id="next" aria-label="Próxima página" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<div class="note">
+  <b>Encontrou um dado desatualizado?</b> Abra a última página do guia e toque em
+  <i>“Atualizar dados agora”</i> para enviar a correção. As atualizações passam por validação antes de aparecerem aqui.
+</div>
+
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> para folhear · toque nas laterais da página</div>
+
+<!-- ===================== FORMULÁRIO DE ATUALIZAÇÃO ===================== -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="sheet-close" id="overlay-close" aria-label="Fechar">×</button>
+      <div class="rh">Atualização</div>
+      <h2 id="overlay-title">Informar dados atualizados</h2>
+      <p>Preencha apenas os campos que mudaram. Sua sugestão é revisada pela coordenação antes de ser publicada.</p>
+    </div>
+
+    <div class="sheet-body">
+      <div id="form-view">
+        <div class="field">
+          <label for="f-inst">Instituição</label>
+          <select id="f-inst"><option value="">— selecione —</option></select>
+        </div>
+        <div class="field">
+          <label for="f-endereco">Endereço</label>
+          <input id="f-endereco" type="text" autocomplete="off" placeholder="Rua, número, bairro">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-telefone">Telefone</label>
+            <input id="f-telefone" type="text" inputmode="tel" placeholder="(49) 0000-0000">
+          </div>
+          <div class="field">
+            <label for="f-whatsapp">WhatsApp</label>
+            <input id="f-whatsapp" type="text" inputmode="tel" placeholder="(49) 00000-0000">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-email">E-mail</label>
+          <input id="f-email" type="email" autocomplete="off" placeholder="nome@saojoaquim.sc.gov.br">
+        </div>
+        <div class="field">
+          <label for="f-disseminador">Disseminador(a) de referência</label>
+          <input id="f-disseminador" type="text" autocomplete="off" placeholder="Nome da pessoa de contato">
+        </div>
+        <div class="field">
+          <label for="f-obs">Observação</label>
+          <textarea id="f-obs" placeholder="Algo a mais que a coordenação precise saber? (opcional)"></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="f-nome">Seu nome</label>
+            <input id="f-nome" type="text" autocomplete="name" placeholder="Opcional">
+          </div>
+          <div class="field">
+            <label for="f-contato">Seu contato</label>
+            <input id="f-contato" type="text" autocomplete="off" placeholder="Telefone ou e-mail (opcional)">
+          </div>
+        </div>
+        <p class="hintline" style="margin-bottom:10px">Seu nome e contato ajudam a coordenação a confirmar a informação, se necessário.</p>
+
+        <button class="btn-primary" id="f-enviar" type="button">Enviar atualização</button>
+        <div class="form-msg" id="form-msg"></div>
+      </div>
+
+      <div id="success-view" style="display:none">
+        <div class="success-box">
+          <div class="check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3>Atualização enviada</h3>
+          <p>Obrigado por ajudar a manter o guia vivo. A coordenação vai revisar e publicar a correção.</p>
+          <button class="btn-primary" id="success-close" type="button" style="margin-top:16px">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="store.js"></script>
+<script src="app.js"></script>
+<script>
+/* registro do Service Worker (PWA) — só funciona em HTTPS ou localhost */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("service-worker.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
