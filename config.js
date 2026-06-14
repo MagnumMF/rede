@@ -7,9 +7,11 @@
         • CATÁLOGO  -> cole o conteúdo de  seed-data.json
         • CAIXA     -> cole o conteúdo de  seed-inbox.json
       Ao salvar cada um, a URL da barra do navegador vira algo como:
-        https://jsonblob.com/1234567890123456789
-      A URL da API correspondente é (troque só o caminho):
-        https://jsonblob.com/api/jsonBlob/1234567890123456789
+        https://jsonblob.com/019ec496-f338-7d8e-9708-e048091a7c86
+      Pegue só o ID do final e monte a URL DA API neste formato:
+        https://api.jsonblob.com/019ec496-f338-7d8e-9708-e048091a7c86
+      (a base é  api.jsonblob.com  e o caminho é o ID direto — sem
+       /api/jsonBlob/. Esse é o endereço oficial atual da API.)
 
    2) Cole as duas URLs de API abaixo.
    3) Defina a senha do painel de controle.
@@ -32,8 +34,7 @@ window.CONFIG = {
 
   /* Senha do painel de controle (admin.html).
      ATENÇÃO: isto apenas ESCONDE a tela de administração no navegador.
-     Não é segurança real (veja a seção "Segurança" no LEIA-ME.md).
-     Troque por uma senha sua antes de publicar. */
+     Não é segurança real (veja a seção "Segurança" no LEIA-ME.md). */
   ADMIN_SENHA: "#infSJ01#",
 
   /* Textos da capa/rodapé (opcional — já vêm preenchidos). */
