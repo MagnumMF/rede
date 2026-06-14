@@ -28,7 +28,7 @@ window.CONFIG = {
 
   /* Endereço público onde o app ficará hospedado.
      Usado para gerar o QR Code da página de atualização. */
-  APP_URL: "https://github.com/MagnumMF/rede",
+  APP_URL: "https://magnummf.github.io/rede/",
 
   /* Senha do painel de controle (admin.html).
      ATENÇÃO: isto apenas ESCONDE a tela de administração no navegador.
