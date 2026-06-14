@@ -7,7 +7,7 @@
    IMPORTANTE: ao publicar uma nova versão dos arquivos, troque o número
    em CACHE_VERSION abaixo para forçar a atualização nos aparelhos.
    ===================================================================== */
-var CACHE_VERSION = "rede-protecao-v1";
+var CACHE_VERSION = "rede-protecao-v2";
 
 /* Arquivos do shell (sempre disponíveis offline). */
 var SHELL = [
