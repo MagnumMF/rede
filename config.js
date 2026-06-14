@@ -28,13 +28,13 @@ window.CONFIG = {
 
   /* Endereço público onde o app ficará hospedado.
      Usado para gerar o QR Code da página de atualização. */
-  APP_URL: "https://exemplo.com.br/rede-protecao",
+  APP_URL: "https://github.com/MagnumMF/rede",
 
   /* Senha do painel de controle (admin.html).
      ATENÇÃO: isto apenas ESCONDE a tela de administração no navegador.
      Não é segurança real (veja a seção "Segurança" no LEIA-ME.md).
      Troque por uma senha sua antes de publicar. */
-  ADMIN_SENHA: "trocar-esta-senha",
+  ADMIN_SENHA: "#infsj01#",
 
   /* Textos da capa/rodapé (opcional — já vêm preenchidos). */
   TITULO: "Guia da Rede de Proteção Integral à Infância e à Adolescência",
