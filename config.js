@@ -20,11 +20,11 @@ window.CONFIG = {
 
   /* URL DA API do blob do CATÁLOGO (dados públicos das instituições).
      O app LÊ daqui; o painel de controle ESCREVE aqui. */
-  CATALOGO_URL: "https://jsonblob.com/api/jsonBlob/COLE_AQUI_O_ID_DO_CATALOGO",
+  CATALOGO_URL: "https://jsonblob.com/api/jsonBlob/019ec496-f338-7d8e-9708-e048091a7c86",
 
   /* URL DA API do blob da CAIXA DE ENTRADA (pedidos de atualização).
      O formulário público ESCREVE aqui; o painel LÊ e limpa daqui. */
-  CAIXA_URL: "https://jsonblob.com/api/jsonBlob/COLE_AQUI_O_ID_DA_CAIXA",
+  CAIXA_URL: "https://jsonblob.com/api/jsonBlob/019ec499-3f94-7465-ab1e-cea28c292e3c",
 
   /* Endereço público onde o app ficará hospedado.
      Usado para gerar o QR Code da página de atualização. */
