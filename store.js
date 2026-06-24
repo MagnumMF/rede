@@ -2,26 +2,22 @@
   "use strict";
   var C = window.CONFIG || {};
 
-async function githubRequest(gistId, method, body) {
-    // Adicionamos um timestamp para evitar cache do navegador na leitura
-    var url = "https://api.github.com/gists/" + gistId + (method === "GET" ? "?t=" + Date.now() : "");
+async function githubRequest(gistId, method, body, token) {
+    var url = "https://api.github.com/gists/" + gistId + "?t=" + Date.now();
     var headers = { "Accept": "application/vnd.github+json" };
     
-    if (method === "PATCH") {
-      headers["Authorization"] = "Bearer " + C.GITHUB_TOKEN;
+    // Se houver um token (vindo do login do admin), ele usa. Se não, vai anônimo.
+    if (token) {
+      headers["Authorization"] = "Bearer " + token;
     }
 
     var options = { method: method, headers: headers };
     if (body) options.body = JSON.stringify(body);
 
     var r = await fetch(url, options);
-    if (!r.ok) {
-        if(r.status === 401) throw new Error("Token do GitHub inválido ou expirado.");
-        throw new Error("Erro GitHub: " + r.status);
-    }
+    if (!r.ok) throw new Error("Erro: " + r.status);
     
     var data = await r.json();
-    // Pega o conteúdo do primeiro arquivo do Gist
     var files = data.files;
     var firstFile = files[Object.keys(files)[0]];
     return JSON.parse(firstFile.content);
