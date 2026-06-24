@@ -167,38 +167,41 @@
     var pages = [], toc = [];
     sidebarData = [];
 
-    sidebarData.push({ tipo: 'capa', nome: 'Capa / Apresentação', spread: 1 });
+    // FÓRMULA CORRIGIDA DE CÁLCULO DE FOLHA (SPREAD): Math.floor((pages.length + 1) / 2) + 1
     
+    sidebarData.push({ tipo: 'capa', nome: 'Capa', spread: Math.floor((pages.length + 1) / 2) + 1 });
     pages.push(paginaCapa(meta));
+    
+    sidebarData.push({ tipo: 'capa', nome: 'Apresentação', spread: Math.floor((pages.length + 1) / 2) + 1 });
     pages.push(paginaApresentacao());
     
     var idxSumario = pages.length; pages.push(""); // reservado
-    sidebarData.push({ tipo: 'capa', nome: 'Sumário', spread: 2 });
+    sidebarData.push({ tipo: 'capa', nome: 'Sumário', spread: Math.floor((pages.length + 1) / 2) + 1 });
 
     EIXOS.forEach(function(eixo){
       toc.push({ nome:eixo.titulo, cor:eixo.id, pagina: pages.length + 1 });
       
-      var spreadEixo = Math.floor(pages.length / 2) + 1;
+      var spreadEixo = Math.floor((pages.length + 1) / 2) + 1;
       sidebarData.push({ tipo: 'eixo', nome: eixo.titulo, spread: spreadEixo });
       pages.push(divider(eixo));
       
       insts.filter(function(i){ return i.eixo === eixo.id; })
            .sort(function(a,b){ return (a.ordem||0)-(b.ordem||0); })
            .forEach(function(i){ 
-             var spreadInst = Math.floor(pages.length / 2) + 1;
+             var spreadInst = Math.floor((pages.length + 1) / 2) + 1;
              var tags = [i.nome, (i.kicker||""), (i.rh||""), eixo.titulo, (i.sub||"")].join(" ").toLowerCase();
              sidebarData.push({ tipo: 'inst', nome: i.nome, sub: (i.kicker || "Unidade"), spread: spreadInst, tags: tags });
              pages.push(card(i)); 
            });
     });
 
-    var spreadCanais = Math.floor(pages.length / 2) + 1;
+    var spreadCanais = Math.floor((pages.length + 1) / 2) + 1;
     sidebarData.push({ tipo: 'eixo', nome: 'Rede e Atualização', spread: spreadCanais });
     sidebarData.push({ tipo: 'inst', nome: 'Canais de Denúncia', sub: 'Em caso de violência', spread: spreadCanais, tags: 'canais denúncia 100 190 conselho tutelar samu' });
     toc.push({ nome:"Canais de denúncia", cor:"denuncia", pagina: pages.length + 1 });
     pages.push(paginaCanais());
     
-    var spreadUpdate = Math.floor(pages.length / 2) + 1;
+    var spreadUpdate = Math.floor((pages.length + 1) / 2) + 1;
     sidebarData.push({ tipo: 'inst', nome: 'Atualizar Dados', sub: 'Mantenha o guia vivo', spread: spreadUpdate, tags: 'atualizar dados forms update cadastro erro corrigir' });
     toc.push({ nome:"Atualize os dados", cor:"update", pagina: pages.length + 1 });
     pages.push(paginaAtualizacao());
@@ -253,7 +256,6 @@
   function next(){ if(current>=max)return; flip(current-1,true); current++; shift(); updateUI(); }
   function prev(){ if(current<=1)return; current--; flip(current-1,false); shift(); updateUI(); }
 
-  // Nova função para o Menu Lateral ir direto para a página alvo
   function goToSpread(target) {
     if(target < 1) target = 1;
     if(target > max) target = max;
@@ -262,7 +264,7 @@
     for (var i = 0; i < numPapers; i++) {
       var p = papers[i];
       clearTimeout(p._t);
-      p.style.transition = "none"; // Desativa transição para um pulo instantâneo
+      p.style.transition = "none";
       if (i < current - 1) {
         p.classList.add("flipped");
         p.style.zIndex = N + i;
@@ -270,8 +272,8 @@
         p.classList.remove("flipped");
         p.style.zIndex = numPapers - i;
       }
-      void p.offsetWidth; // Força reflow
-      p.style.transition = ""; // Restaura transição CSS
+      void p.offsetWidth;
+      p.style.transition = ""; 
     }
     shift(); updateUI();
   }
@@ -293,8 +295,8 @@
     book.addEventListener("touchend",function(e){ if(tx===null)return; var dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>40){ dx<0?next():prev(); } tx=null; });
     window.addEventListener("resize",rescale);
   }
+  
   function rescale(){
-    // O cálculo de espaço disponível conta com o padding do body.
     var need=382*2+80;
     var paddingEsq = window.innerWidth > 860 ? 280 : 0; 
     var avail = Math.min(window.innerWidth - paddingEsq - 24, 980);
@@ -323,11 +325,10 @@
     
     var html = "";
     sidebarData.forEach(function(item) {
-      if (q && item.tipo === 'eixo') return; // Esconde títulos de eixo ao buscar
-      if (q && item.tipo === 'capa') return; // Esconde capas ao buscar
-      
+      if (q && item.tipo === 'eixo') return; 
+      if (q && item.tipo === 'capa') return; 
       if (q && item.tipo === 'inst') {
-        if (item.tags.indexOf(q) === -1) return; // Filtro de busca
+        if (item.tags.indexOf(q) === -1) return;
       }
       
       if (item.tipo === 'eixo' && !q) {
@@ -358,7 +359,6 @@
     if(btn && sidebar) btn.onclick = function() { sidebar.classList.add("open"); };
     if(close && sidebar) close.onclick = function() { sidebar.classList.remove("open"); };
     
-    // Auto-fechar o menu em celulares após clicar em uma página
     document.getElementById("s-list").addEventListener("click", function(e) {
        if(e.target.closest(".s-item:not(.eixo)")) {
           if(window.innerWidth <= 860 && sidebar) sidebar.classList.remove("open");
@@ -609,7 +609,6 @@
       construir(pages);
       construirImpressao(copia);
       
-      // Renderiza o menu lateral na inicialização (sem filtro = exibe tudo)
       renderSidebar("");
     }catch(e){
       erro('<b>Não foi possível carregar os dados.</b><br>Verifique o ID do Gist no <code>config.js</code> e sua conexão.<br><span style="font-size:11px;opacity:.7">('+E(e.message||e)+')</span>');
