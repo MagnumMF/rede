@@ -3,56 +3,68 @@
     "titulo": "Guia da Rede de Proteção Integral à Infância e à Adolescência",
     "municipio": "São Joaquim · SC",
     "comarca": "Comarca de São Joaquim · SC",
-    "atualizadoEm": "2026-06-14",
-    "versao": 1
+    "atualizadoEm": "2026-06-22",
+    "versao": 2
   },
   "instituicoes": [
     {
-      "id": "cras",
+      "id": "sec-social",
       "eixo": "social",
       "ordem": 1,
+      "rh": "Assistência Social",
+      "kicker": "Gestão Municipal",
+      "nome": "Secretaria Municipal de Assistência Social",
+      "sub": "Coordenação das políticas municipais de assistência social",
+      "desc": "Coordena a <b>política municipal de assistência social</b> (SUAS) — proteção social básica e especial — articulando CRAS, CREAS e o serviço de acolhimento na proteção de crianças e adolescentes.",
+      "endereco": "",
+      "telefone": "",
+      "whatsapp": "",
+      "email": "social@saojoaquim.sc.gov.br",
+      "foto": ""
+    },
+    {
+      "id": "cras",
+      "eixo": "social",
+      "ordem": 2,
       "rh": "Assistência Social",
       "kicker": "Proteção Social Básica",
       "nome": "CRAS",
       "sub": "Centro de Referência de Assistência Social",
       "desc": "<b>Porta de entrada do SUAS.</b> Acompanha famílias em vulnerabilidade pelo PAIF e pelo Serviço de Convivência e Fortalecimento de Vínculos, atuando na <b>prevenção</b> de violações de direitos de crianças e adolescentes.",
       "endereco": "",
-      "telefone": "",
+      "telefone": "(49) 3233-0919; (49) 99201-2640",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "cras@saojoaquim.sc.gov.br",
       "foto": ""
     },
     {
       "id": "creas",
       "eixo": "social",
-      "ordem": 2,
+      "ordem": 3,
       "rh": "Assistência Social",
       "kicker": "Proteção Social Especial",
       "nome": "CREAS",
       "sub": "Centro de Referência Especializado de Assistência Social",
       "desc": "Atende crianças e adolescentes cujos <b>direitos já foram violados</b> — violência, abuso, negligência, trabalho infantil — por meio do PAEFI, em articulação direta com o Conselho Tutelar e a Justiça.",
-      "endereco": "",
-      "telefone": "",
+      "endereco": "Rua Ivo Rodrigues da Silva, 67 · Centro · São Joaquim/SC",
+      "telefone": "(49) 3233-3545",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "creas@saojoaquim.sc.gov.br",
       "foto": ""
     },
     {
       "id": "acolhimento",
       "eixo": "social",
-      "ordem": 3,
+      "ordem": 4,
       "rh": "Assistência Social",
       "kicker": "Alta Complexidade",
       "nome": "Acolhimento Institucional",
       "sub": "Serviço de Acolhimento de Crianças e Adolescentes",
       "desc": "Oferece <b>proteção provisória</b> a quem foi afastado do convívio familiar por medida protetiva, em ambiente seguro, enquanto se trabalha a reintegração familiar ou o encaminhamento para família substituta.",
-      "endereco": "",
-      "telefone": "",
+      "endereco": "Rua Rosalvo Albino, s/nº · Santa Cruz · São Joaquim/SC",
+      "telefone": "(49) 3233-3348",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "acolhimentoinstitucional@saojoaquim.sc.gov.br",
       "foto": ""
     },
     {
@@ -67,8 +79,7 @@
       "endereco": "",
       "telefone": "",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "smssaojoaquim@gmail.com",
       "foto": ""
     },
     {
@@ -84,7 +95,6 @@
       "telefone": "",
       "whatsapp": "",
       "email": "",
-      "disseminador": "",
       "foto": ""
     },
     {
@@ -97,10 +107,9 @@
       "sub": "Centro de Atenção Psicossocial",
       "desc": "Oferece cuidado em <b>saúde mental</b> a crianças e adolescentes com sofrimento psíquico ou uso de substâncias, em articulação com escola, assistência social e família.",
       "endereco": "",
-      "telefone": "",
+      "telefone": "(49) 99965-3793",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "capssaojoaquim@gmail.com",
       "foto": ""
     },
     {
@@ -113,10 +122,9 @@
       "sub": "Coordenação das escolas e creches municipais",
       "desc": "Apoia escolas e creches na <b>identificação e notificação</b> de violações de direitos e promove a <b>busca ativa escolar</b> de estudantes afastados da escola.",
       "endereco": "",
-      "telefone": "",
+      "telefone": "(49) 3233-6425",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "educacao@saojoaquim.edu.sc.gov.br",
       "foto": ""
     },
     {
@@ -132,7 +140,6 @@
       "telefone": "",
       "whatsapp": "",
       "email": "",
-      "disseminador": "",
       "foto": ""
     },
     {
@@ -148,7 +155,6 @@
       "telefone": "",
       "whatsapp": "",
       "email": "",
-      "disseminador": "",
       "foto": ""
     },
     {
@@ -164,7 +170,6 @@
       "telefone": "",
       "whatsapp": "",
       "email": "",
-      "disseminador": "",
       "foto": ""
     },
     {
@@ -177,10 +182,9 @@
       "sub": "Zelando pelos direitos da criança e do adolescente",
       "desc": "Órgão permanente e autônomo. <b>Recebe denúncias</b>, aplica medidas de proteção e <b>requisita serviços</b> das demais políticas — verdadeiro elo de articulação da rede.",
       "endereco": "",
-      "telefone": "",
+      "telefone": "(49) 99194-0006",
       "whatsapp": "",
-      "email": "",
-      "disseminador": "",
+      "email": "conselhotutelar@saojoaquim.sc.gov.br",
       "foto": ""
     },
     {
@@ -196,7 +200,6 @@
       "telefone": "",
       "whatsapp": "",
       "email": "",
-      "disseminador": "",
       "foto": ""
     },
     {
@@ -212,7 +215,6 @@
       "telefone": "",
       "whatsapp": "",
       "email": "",
-      "disseminador": "",
       "foto": ""
     }
   ]
