@@ -23,9 +23,6 @@ window.CONFIG = {
   CATALOGO_GIST_ID: "8a808b01b2f4f15dbc6999ec6c70c083",
   CAIXA_GIST_ID: "9ef265c19a55d1de928039bc936de0fb",
 
-  /* O Token que você gerou no Passo 2 */
-  GITHUB_TOKEN: "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",
-
   /* Configurações visuais */
   APP_URL: "https://magnummf.github.io/rede/",
   ADMIN_SENHA: "#infSJ01#",
