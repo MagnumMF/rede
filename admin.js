@@ -27,34 +27,67 @@
   }
 
   /* ---------------- login ---------------- */
-  function entrar(){
-    var v=document.getElementById("senha").value;
-    if(!C.ADMIN_SENHA || C.ADMIN_SENHA==="trocar-esta-senha"){
-      toast("Defina a senha em config.js antes de usar.", true); return;
+function entrar(){
+    var v = document.getElementById("senha").value.trim();
+    if(v.indexOf("ghp_") !== 0){
+      toast("Para entrar, cole o seu Token do GitHub (ghp_...)", true);
+      return;
     }
-    if(v===C.ADMIN_SENHA){
-      sessionStorage.setItem("rede_admin","1");
-      mostrarPainel();
-    } else {
-      var m=document.getElementById("gate-msg"); m.textContent="Senha incorreta."; m.style.display="block";
-    }
+    // Salva o token apenas na sessão do navegador
+    sessionStorage.setItem("rede_admin_token", v);
+    mostrarPainel();
   }
   function sair(){ sessionStorage.removeItem("rede_admin"); location.reload(); }
 
   /* ---------------- carregamento ---------------- */
-  async function mostrarPainel(){
-    document.getElementById("gate").style.display="none";
-    document.getElementById("painel").style.display="block";
-    document.getElementById("admin-top-actions").style.display="flex";
-    try{
-      catalogo = await Store.getCatalogo();
-      caixa = await Store.getCaixa();
-      if(!caixa || !Array.isArray(caixa.pedidos)) caixa={pedidos:[]};
-      atualizarMedidor(); renderAbas(); render();
-    }catch(e){
+async function mostrarPainel() {
+    // 1. Recupera o token que você colou na tela de login
+    var token = sessionStorage.getItem("rede_admin_token");
+    
+    // Se não houver token, volta para a tela de login
+    if (!token) {
+      document.getElementById("gate").style.display = "block";
+      document.getElementById("painel").style.display = "none";
+      return;
+    }
+
+    // 2. Prepara a interface visual
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("painel").style.display = "block";
+    document.getElementById("admin-top-actions").style.display = "flex";
+
+    try {
+      // 3. Tenta carregar o Catálogo e a Caixa usando o Token
+      // Nota: Certifique-se de que no seu store.js as funções aceitam o argumento 'token'
+      catalogo = await Store.getCatalogo(token);
+      caixa = await Store.getCaixa(token);
+
+      // Garantia de que a caixa de pedidos não seja nula
+      if (!caixa || !Array.isArray(caixa.pedidos)) {
+        caixa = { pedidos: [] };
+      }
+
+      // 4. Se chegou aqui, os dados carregaram. Renderiza tudo.
+      atualizarMedidor();
+      renderAbas();
+      render();
+
+    } catch (e) {
+      // 5. Tratamento de erro (Token inválido, expirado ou Gist ID errado)
+      console.error("Erro no carregamento:", e);
+      
+      var msgErro = e.message;
+      if (msgErro.includes("401")) msgErro = "Token inválido ou expirado.";
+      if (msgErro.includes("404")) msgErro = "Gist não encontrado. Verifique os IDs no config.js.";
+
       document.getElementById("painel").innerHTML =
-        '<div class="empty-state"><div class="big">⚠️</div>Não foi possível carregar os dados.<br>'+
-        'Confira as URLs no <b>config.js</b>.<br><span style="font-size:12px;opacity:.7">'+E(e.message||e)+'</span></div>';
+        '<div class="empty-state">' +
+          '<div class="big">⚠️</div>' +
+          '<b>Falha na Autenticação</b><br>' +
+          'Não foi possível acessar os dados no GitHub.<br><br>' +
+          '<span style="color:var(--c-just); font-weight:600;">Erro: ' + E(msgErro) + '</span><br><br>' +
+          '<button class="btn-primary" onclick="sair()" style="max-width:200px">Voltar e colar novo Token</button>' +
+        '</div>';
     }
   }
 
