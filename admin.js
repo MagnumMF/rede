@@ -13,7 +13,7 @@
   };
   var CAMPO_LABEL = {
     endereco:"Endereço", telefone:"Telefone", whatsapp:"WhatsApp",
-    email:"E-mail", disseminador:"Disseminador(a)"
+    email:"E-mail"
   };
 
   var catalogo = null, caixa = null, abaAtual = "inst";
@@ -132,7 +132,6 @@
           campo(inst.id,"whatsapp","WhatsApp",inst.whatsapp)+
         '</div>'+
         campo(inst.id,"email","E-mail",inst.email)+
-        campo(inst.id,"disseminador","Disseminador(a)",inst.disseminador)+
         campoArea(inst.id,"desc","Descrição (aceita <b>negrito</b>)",inst.desc)+
         '<div class="save-row">'+
           '<button class="btn-save" data-act="salvar" data-id="'+inst.id+'">Salvar</button>'+
@@ -170,7 +169,7 @@
 
   async function salvarCard(id){
     var o=inst(id); if(!o) return;
-    ["nome","sub","kicker","endereco","telefone","email","disseminador","whatsapp","desc"].forEach(function(k){
+    ["nome","sub","kicker","endereco","telefone","email","whatsapp","desc"].forEach(function(k){
       var el=document.getElementById(id+"-"+k); if(el) o[k]=el.value.trim();
     });
     var btn=document.querySelector('[data-act="salvar"][data-id="'+id+'"]');
@@ -223,7 +222,7 @@
     (catalogo.instituicoes||[]).forEach(function(i){ if(i.eixo===eixo) maxOrdem=Math.max(maxOrdem,i.ordem||0); });
     var novo={ id:Store.idUnico("inst"), eixo:eixo, ordem:maxOrdem+1,
       rh:EIXO_LABEL[eixo], kicker:"", nome:nome.trim(), sub:"", desc:"",
-      endereco:"", telefone:"", whatsapp:"", email:"", disseminador:"", foto:"" };
+      endereco:"", telefone:"", whatsapp:"", email:"", foto:"" };
     catalogo.instituicoes.push(novo);
     try{ await Store.putCatalogo(catalogo); toast("Instituição adicionada."); render(); }
     catch(e){ toast("Falha ao salvar.",true); }
