@@ -93,6 +93,11 @@ async function githubRequest(gistId, method, body, token) {
     });
   }
 
+// Helper para pegar o token salvo na sessão do admin
+  function getToken() {
+    return sessionStorage.getItem("rede_admin_token");
+  }
+  
   window.Store = {
     getCatalogo: getCatalogo, putCatalogo: putCatalogo,
     getCaixa: getCaixa, putCaixa: putCaixa, addPedido: addPedido,
