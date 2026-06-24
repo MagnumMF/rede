@@ -2,12 +2,11 @@
   "use strict";
   var C = window.CONFIG || {};
 
-  // Auxiliar para falar com a API do GitHub
-  async function githubRequest(gistId, method, body) {
-    var url = "https://api.github.com/gists/" + gistId;
+async function githubRequest(gistId, method, body) {
+    // Adicionamos um timestamp para evitar cache do navegador na leitura
+    var url = "https://api.github.com/gists/" + gistId + (method === "GET" ? "?t=" + Date.now() : "");
     var headers = { "Accept": "application/vnd.github+json" };
     
-    // Só envia o token se for para gravar (PATCH)
     if (method === "PATCH") {
       headers["Authorization"] = "Bearer " + C.GITHUB_TOKEN;
     }
@@ -16,12 +15,16 @@
     if (body) options.body = JSON.stringify(body);
 
     var r = await fetch(url, options);
-    if (!r.ok) throw new Error("Erro GitHub: " + r.status);
+    if (!r.ok) {
+        if(r.status === 401) throw new Error("Token do GitHub inválido ou expirado.");
+        throw new Error("Erro GitHub: " + r.status);
+    }
     
     var data = await r.json();
-    // O GitHub retorna os arquivos dentro do objeto 'files'
-    var fileName = Object.keys(data.files)[0];
-    return JSON.parse(data.files[fileName].content);
+    // Pega o conteúdo do primeiro arquivo do Gist
+    var files = data.files;
+    var firstFile = files[Object.keys(files)[0]];
+    return JSON.parse(firstFile.content);
   }
 
   /* -------- Funções de Interface -------- */
