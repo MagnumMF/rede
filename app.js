@@ -293,29 +293,108 @@
     ov.classList.remove("open"); document.body.style.overflow="";
   }
 
-  async function enviarForm(){
-    var get = function(id){ var el=document.getElementById(id); return el?el.value.trim():""; };
-    var inst = document.getElementById("f-inst");
-    var nomeInst = inst.options[inst.selectedIndex].text;
-    
-    if(!get("f-inst")){ alert("Selecione a instituição"); return; }
+  async function enviarForm() {
+    var tipo = document.getElementById("f-tipo").value;
+    var instId = document.getElementById("f-inst").value;
+    var eixo = document.getElementById("f-eixo").value;
+    var nomeInst = document.getElementById("f-nome-inst").value.trim();
+    var endereco = document.getElementById("f-endereco").value.trim();
+    var telefone = document.getElementById("f-telefone").value.trim();
+    var whatsapp = document.getElementById("f-whatsapp").value.trim();
+    var email = document.getElementById("f-email").value.trim();
+    var obs = document.getElementById("f-obs").value.trim();
+    var fileInput = document.getElementById("f-foto");
 
-    // Monta a mensagem para o WhatsApp
-    var texto = `*Sugestão de Atualização - Guia da Rede*%0A%0A` +
-                `*Instituição:* ${nomeInst}%0A` +
-                `*Endereço:* ${get("f-endereco")}%0A` +
-                `*Telefone:* ${get("f-telefone")}%0A` +
-                `*WhatsApp:* ${get("f-whatsapp")}%0A` +
-                `*E-mail:* ${get("f-email")}%0A` +
-                `*Obs:* ${get("f-obs")}%0A%0A` +
-                `*Enviado por:* ${get("f-nome")}`;
+    if (tipo !== "add" && !instId) { alert("Por favor, selecione a instituição atual."); return; }
+    if (tipo === "add" && !nomeInst) { alert("Por favor, informe o nome da nova instituição."); return; }
 
-    // Abre o WhatsApp da coordenação (coloque o número real abaixo)
-    var numeroCoord = "554932330900"; 
-    window.open(`https://wa.me/${numeroCoord}?text=${texto}`, '_blank');
-    
-    fecharForm();
-    alert("Sua sugestão foi preparada! Envie a mensagem no WhatsApp que abriu.");
+    var btn = document.getElementById("f-enviar");
+    btn.disabled = true; btn.textContent = "Processando e enviando...";
+
+    try {
+      // Processar a foto (se houver)
+      var fotoBase64 = "";
+      if (fileInput.files && fileInput.files[0]) {
+        fotoBase64 = await Store.comprimirImagem(fileInput.files[0], 1000, 0.72);
+      }
+
+      var pedido = {
+        id: Store.idUnico("req"),
+        tipo: tipo, // "edit", "add" ou "del"
+        instituicaoId: (tipo === "add") ? Store.idUnico("inst") : instId,
+        criadoEm: new Date().toISOString(),
+        observacao: obs,
+        autorNome: document.getElementById("f-nome").value.trim(),
+        autorContato: document.getElementById("f-contato").value.trim(),
+        campos: {}
+      };
+
+      if (tipo === "add" || tipo === "edit") {
+        if (nomeInst) pedido.campos.nome = nomeInst;
+        if (endereco) pedido.campos.endereco = endereco;
+        if (telefone) pedido.campos.telefone = telefone;
+        if (whatsapp) pedido.campos.whatsapp = whatsapp;
+        if (email) pedido.campos.email = email;
+        if (fotoBase64) pedido.campos.foto = fotoBase64;
+        if (tipo === "add") pedido.campos.eixo = eixo;
+      }
+
+      // ==== LÓGICA DE APROVAÇÃO AUTOMÁTICA POR DATA ====
+      var hoje = new Date();
+      // Ajusta para o fuso horário local e extrai formato YYYY-MM-DD
+      var dataStr = hoje.getFullYear() + "-" + 
+                    String(hoje.getMonth() + 1).padStart(2, '0') + "-" + 
+                    String(hoje.getDate()).padStart(2, '0');
+      var ehPeriodoEspecial = (dataStr >= "2026-06-24" && dataStr <= "2026-07-01");
+      var ehPrimeiroDeJan = (dataStr.endsWith("-01-01"));
+      
+      var aprovarAutomatico = ehPeriodoEspecial || ehPrimeiroDeJan;
+
+      if (aprovarAutomatico) {
+        // Altera o catálogo oficial direto
+        var cat = await Store.getCatalogo();
+        
+        if (tipo === "add") {
+          cat.instituicoes.push({
+            id: pedido.instituicaoId,
+            eixo: pedido.campos.eixo,
+            ordem: 99,
+            rh: "Unidade Inserida",
+            kicker: "Nova",
+            nome: pedido.campos.nome,
+            endereco: pedido.campos.endereco || "",
+            telefone: pedido.campos.telefone || "",
+            whatsapp: pedido.campos.whatsapp || "",
+            email: pedido.campos.email || "",
+            foto: pedido.campos.foto || ""
+          });
+        } else if (tipo === "edit") {
+          var obj = cat.instituicoes.find(function(i) { return i.id === pedido.instituicaoId; });
+          if (obj) Object.keys(pedido.campos).forEach(function(k) { obj[k] = pedido.campos[k]; });
+        } else if (tipo === "del") {
+          cat.instituicoes = cat.instituicoes.filter(function(i) { return i.id !== pedido.instituicaoId; });
+        }
+        
+        await Store.putCatalogo(cat);
+        alert("Alteração publicada automaticamente! O guia será recarregado.");
+        location.reload();
+
+      } else {
+        // Manda para a caixa de pendentes do Painel de Controle
+        pedido.status = "pendente";
+        await Store.addPedido(pedido);
+
+        fecharForm();
+        document.getElementById("form-view").style.display = "none";
+        document.getElementById("success-view").style.display = "block";
+        abrirForm(); // Reabre na aba de sucesso
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Falha de conexão. Tente novamente.\n" + e.message);
+    } finally {
+      btn.disabled = false; btn.textContent = "Enviar formulário";
+    }
   }
 
   function ligarForm(){
