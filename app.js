@@ -280,13 +280,48 @@
     });
   }
 
+  // Reseta os campos de texto do formulário
+  function limparCampos() {
+    document.getElementById("f-nome-inst").value = "";
+    document.getElementById("f-endereco").value = "";
+    document.getElementById("f-telefone").value = "";
+    document.getElementById("f-whatsapp").value = "";
+    document.getElementById("f-email").value = "";
+    document.getElementById("f-obs").value = "";
+    document.getElementById("f-foto").value = "";
+  }
+
+  // Preenche os campos com os dados atuais da instituição escolhida
+  function preencherCamposEdicao(instId) {
+    if (!instId || !catalogoAtual) {
+      limparCampos();
+      return;
+    }
+    var inst = catalogoAtual.instituicoes.find(function(i) { return i.id === instId; });
+    if (inst) {
+      document.getElementById("f-nome-inst").value = inst.nome || "";
+      document.getElementById("f-endereco").value = inst.endereco || "";
+      document.getElementById("f-telefone").value = inst.telefone || "";
+      document.getElementById("f-whatsapp").value = inst.whatsapp || "";
+      document.getElementById("f-email").value = inst.email || "";
+      document.getElementById("f-obs").value = "";
+      document.getElementById("f-foto").value = ""; // Input de arquivo não pode ser preenchido por segurança
+    } else {
+      limparCampos();
+    }
+  }
+
   function abrirForm(prefId){
     var ov=document.getElementById("overlay"); if(!ov) return;
     document.getElementById("form-view").style.display="block";
     document.getElementById("success-view").style.display="none";
-    if(prefId){ var s=document.getElementById("f-inst"); if(s) s.value=prefId; }
     
-    // Dispara o evento de "change" no tipo para arrumar a exibição dos campos
+    var s=document.getElementById("f-inst"); 
+    if(prefId && s){ 
+      s.value=prefId; 
+    }
+    
+    // Dispara o evento de "change" no tipo para arrumar a exibição dos campos e puxar dados
     var selTipo = document.getElementById("f-tipo");
     if(selTipo) selTipo.dispatchEvent(new Event("change"));
 
@@ -334,14 +369,39 @@
         campos: {}
       };
 
+      // Recupera o objeto atual para só enviar o que REALMENTE mudou (na edição)
+      var objAtual = null;
+      if (tipo === "edit") {
+        objAtual = catalogoAtual.instituicoes.find(function(i) { return i.id === instId; }) || {};
+      }
+
+      // Função ajudante para gravar no pedido apenas campos modificados
+      var addCampoSeMudou = function(chave, novoValor) {
+        if (tipo === "add") {
+          pedido.campos[chave] = novoValor;
+        } else if (tipo === "edit") {
+          var valorAntigo = objAtual[chave] || "";
+          if (novoValor !== valorAntigo) {
+            pedido.campos[chave] = novoValor;
+          }
+        }
+      };
+
       if (tipo === "add" || tipo === "edit") {
-        if (nomeInst) pedido.campos.nome = nomeInst;
-        if (endereco) pedido.campos.endereco = endereco;
-        if (telefone) pedido.campos.telefone = telefone;
-        if (whatsapp) pedido.campos.whatsapp = whatsapp;
-        if (email) pedido.campos.email = email;
-        if (fotoBase64) pedido.campos.foto = fotoBase64;
+        addCampoSeMudou("nome", nomeInst);
+        addCampoSeMudou("endereco", endereco);
+        addCampoSeMudou("telefone", telefone);
+        addCampoSeMudou("whatsapp", whatsapp);
+        addCampoSeMudou("email", email);
+        if (fotoBase64) pedido.campos.foto = fotoBase64; // Foto sempre vai se tiver sido escolhida uma nova
         if (tipo === "add") pedido.campos.eixo = eixo;
+      }
+
+      // Se é edição, não enviou foto nova, os campos não mudaram e não tem observação: barrar.
+      if (tipo === "edit" && Object.keys(pedido.campos).length === 0 && !obs) {
+        alert("Nenhuma alteração foi feita em relação aos dados atuais.");
+        btn.disabled = false; btn.textContent = "Enviar formulário";
+        return;
       }
 
       // ==== LÓGICA DE APROVAÇÃO AUTOMÁTICA POR DATA ====
@@ -411,14 +471,32 @@
     if(byId("success-close")) byId("success-close").onclick=fecharForm;
     document.addEventListener("keydown",function(e){ if(e.key==="Escape") fecharForm(); });
     
-    // --- LÓGICA NOVA PARA MOSTRAR/ESCONDER CAMPOS ---
+    // --- LÓGICA PARA MOSTRAR/ESCONDER E PREENCHER CAMPOS ---
     var selTipo = byId("f-tipo");
+    var selInst = byId("f-inst");
+
     if(selTipo) {
       selTipo.addEventListener("change", function() {
         var v = selTipo.value;
         byId("box-inst").style.display = (v === "add") ? "none" : "block";
         byId("box-eixo").style.display = (v === "add") ? "block" : "none";
         byId("box-campos-dados").style.display = (v === "del") ? "none" : "block";
+
+        if (v === "add") {
+          limparCampos();
+          if (selInst) selInst.value = ""; 
+        } else if (v === "edit" && selInst) {
+          preencherCamposEdicao(selInst.value);
+        }
+      });
+    }
+
+    // Se o usuário trocar a instituição no menu, recarrega os dados dela
+    if(selInst) {
+      selInst.addEventListener("change", function() {
+        if (selTipo && selTipo.value === "edit") {
+          preencherCamposEdicao(selInst.value);
+        }
       });
     }
 
