@@ -294,41 +294,28 @@
   }
 
   async function enviarForm(){
-    var get=function(id){ var el=document.getElementById(id); return el?el.value.trim():""; };
-    var instId=get("f-inst");
-    var msg=document.getElementById("form-msg");
-    msg.className="form-msg"; msg.textContent="";
-    if(!instId){ msg.className="form-msg bad"; msg.textContent="Escolha qual instituição você quer corrigir."; return; }
-    var campos={};
-    ["endereco","telefone","whatsapp","email"].forEach(function(k){
-      var v=get("f-"+k); if(v) campos[k]=v;
-    });
-    var observacao=get("f-obs");
-    if(Object.keys(campos).length===0 && !observacao){
-      msg.className="form-msg bad"; msg.textContent="Preencha pelo menos um dado corrigido ou escreva uma observação."; return;
-    }
-    var inst=(catalogoAtual.instituicoes||[]).find(function(i){return i.id===instId;})||{};
-    var pedido={
-      id: Store.idUnico("req"),
-      criadoEm: new Date().toISOString(),
-      instituicaoId: instId,
-      instituicaoNome: inst.nome || instId,
-      campos: campos,
-      observacao: observacao,
-      autorNome: get("f-nome"),
-      autorContato: get("f-contato"),
-      status: "pendente"
-    };
-    var btn=document.getElementById("f-enviar"); btn.disabled=true; var t=btn.textContent; btn.textContent="Enviando…";
-    try{
-      await Store.addPedido(pedido);
-      document.getElementById("form-view").style.display="none";
-      document.getElementById("success-view").style.display="block";
-      ["f-endereco","f-telefone","f-whatsapp","f-email","f-obs","f-nome","f-contato"].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=""; });
-    }catch(e){
-      msg.className="form-msg bad";
-      msg.textContent="Não foi possível enviar agora. Verifique sua conexão e tente novamente.";
-    }finally{ btn.disabled=false; btn.textContent=t; }
+    var get = function(id){ var el=document.getElementById(id); return el?el.value.trim():""; };
+    var inst = document.getElementById("f-inst");
+    var nomeInst = inst.options[inst.selectedIndex].text;
+    
+    if(!get("f-inst")){ alert("Selecione a instituição"); return; }
+
+    // Monta a mensagem para o WhatsApp
+    var texto = `*Sugestão de Atualização - Guia da Rede*%0A%0A` +
+                `*Instituição:* ${nomeInst}%0A` +
+                `*Endereço:* ${get("f-endereco")}%0A` +
+                `*Telefone:* ${get("f-telefone")}%0A` +
+                `*WhatsApp:* ${get("f-whatsapp")}%0A` +
+                `*E-mail:* ${get("f-email")}%0A` +
+                `*Obs:* ${get("f-obs")}%0A%0A` +
+                `*Enviado por:* ${get("f-nome")}`;
+
+    // Abre o WhatsApp da coordenação (coloque o número real abaixo)
+    var numeroCoord = "554932330900"; 
+    window.open(`https://wa.me/${numeroCoord}?text=${texto}`, '_blank');
+    
+    fecharForm();
+    alert("Sua sugestão foi preparada! Envie a mensagem no WhatsApp que abriu.");
   }
 
   function ligarForm(){
