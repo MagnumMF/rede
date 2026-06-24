@@ -1,7 +1,7 @@
 /* =====================================================================
    APP.JS — WebApp do Guia da Rede de Proteção
    Carrega os dados do catálogo (JSONBlob), monta o flipbook e controla
-   o formulário público de atualização.
+   o formulário público de atualização e o menu lateral (busca).
    ===================================================================== */
 (function () {
   "use strict";
@@ -41,7 +41,6 @@
   function has(v){ return v != null && String(v).trim() !== ""; }
   function soDigitos(s){ return String(s||"").replace(/\D/g,""); }
   function cssUrl(s){ return String(s||"").replace(/["'()\\\n\r]/g,""); }
-  function fill(n){ var out=""; for(var i=0;i<(n||14);i++) out+="&nbsp;"; return '<span class="fill">'+out+"</span>"; }
 
   /* ---------------- páginas dinâmicas ---------------- */
   function divider(eixo){
@@ -57,8 +56,6 @@
 
   function card(o){
     var eixo = o.eixo;
-
-    // Renderiza um ou mais telefones (separados por ; ou ·) como links tel:.
     function telField(v){
       return String(v).split(/[;·]/).map(function(s){ return s.trim(); })
         .filter(Boolean)
@@ -161,36 +158,59 @@
     '</div>';
   }
 
-  /* ---------------- montagem da sequência de páginas ---------------- */
+  /* ---------------- Dados para o Menu Lateral ---------------- */
+  var sidebarData = [];
+
   function montar(catalogo){
     var meta = catalogo.meta || {};
     var insts = (catalogo.instituicoes || []).slice();
     var pages = [], toc = [];
+    sidebarData = [];
 
+    sidebarData.push({ tipo: 'capa', nome: 'Capa / Apresentação', spread: 1 });
+    
     pages.push(paginaCapa(meta));
     pages.push(paginaApresentacao());
-    var idxSumario = pages.length; pages.push("");   // reservado, preenchido depois
+    
+    var idxSumario = pages.length; pages.push(""); // reservado
+    sidebarData.push({ tipo: 'capa', nome: 'Sumário', spread: 2 });
 
     EIXOS.forEach(function(eixo){
       toc.push({ nome:eixo.titulo, cor:eixo.id, pagina: pages.length + 1 });
+      
+      var spreadEixo = Math.floor(pages.length / 2) + 1;
+      sidebarData.push({ tipo: 'eixo', nome: eixo.titulo, spread: spreadEixo });
       pages.push(divider(eixo));
+      
       insts.filter(function(i){ return i.eixo === eixo.id; })
            .sort(function(a,b){ return (a.ordem||0)-(b.ordem||0); })
-           .forEach(function(i){ pages.push(card(i)); });
+           .forEach(function(i){ 
+             var spreadInst = Math.floor(pages.length / 2) + 1;
+             var tags = [i.nome, (i.kicker||""), (i.rh||""), eixo.titulo, (i.sub||"")].join(" ").toLowerCase();
+             sidebarData.push({ tipo: 'inst', nome: i.nome, sub: (i.kicker || "Unidade"), spread: spreadInst, tags: tags });
+             pages.push(card(i)); 
+           });
     });
 
+    var spreadCanais = Math.floor(pages.length / 2) + 1;
+    sidebarData.push({ tipo: 'eixo', nome: 'Rede e Atualização', spread: spreadCanais });
+    sidebarData.push({ tipo: 'inst', nome: 'Canais de Denúncia', sub: 'Em caso de violência', spread: spreadCanais, tags: 'canais denúncia 100 190 conselho tutelar samu' });
     toc.push({ nome:"Canais de denúncia", cor:"denuncia", pagina: pages.length + 1 });
     pages.push(paginaCanais());
+    
+    var spreadUpdate = Math.floor(pages.length / 2) + 1;
+    sidebarData.push({ tipo: 'inst', nome: 'Atualizar Dados', sub: 'Mantenha o guia vivo', spread: spreadUpdate, tags: 'atualizar dados forms update cadastro erro corrigir' });
     toc.push({ nome:"Atualize os dados", cor:"update", pagina: pages.length + 1 });
     pages.push(paginaAtualizacao());
+    
     pages.push(paginaContracapa());
-
     pages[idxSumario] = paginaSumario(toc);
+
     return pages;
   }
 
   /* =====================================================================
-     MECÂNICA DO LIVRO
+     MECÂNICA DO LIVRO E MENU
      ===================================================================== */
   var book, papers, N, numPapers, current = 1, max;
 
@@ -233,6 +253,29 @@
   function next(){ if(current>=max)return; flip(current-1,true); current++; shift(); updateUI(); }
   function prev(){ if(current<=1)return; current--; flip(current-1,false); shift(); updateUI(); }
 
+  // Nova função para o Menu Lateral ir direto para a página alvo
+  function goToSpread(target) {
+    if(target < 1) target = 1;
+    if(target > max) target = max;
+    current = target;
+    
+    for (var i = 0; i < numPapers; i++) {
+      var p = papers[i];
+      clearTimeout(p._t);
+      p.style.transition = "none"; // Desativa transição para um pulo instantâneo
+      if (i < current - 1) {
+        p.classList.add("flipped");
+        p.style.zIndex = N + i;
+      } else {
+        p.classList.remove("flipped");
+        p.style.zIndex = numPapers - i;
+      }
+      void p.offsetWidth; // Força reflow
+      p.style.transition = ""; // Restaura transição CSS
+    }
+    shift(); updateUI();
+  }
+
   var navLigada=false;
   function ligarNavegacao(){
     if (navLigada) return; navLigada=true;
@@ -251,7 +294,11 @@
     window.addEventListener("resize",rescale);
   }
   function rescale(){
-    var need=382*2+80, avail=Math.min(window.innerWidth-24,980), s=Math.min(1,avail/need);
+    // O cálculo de espaço disponível conta com o padding do body.
+    var need=382*2+80;
+    var paddingEsq = window.innerWidth > 860 ? 280 : 0; 
+    var avail = Math.min(window.innerWidth - paddingEsq - 24, 980);
+    var s = Math.min(1, avail/need);
     document.getElementById("scaler").style.transform="scale("+s+")";
   }
 
@@ -264,6 +311,59 @@
       pa.insertAdjacentHTML("beforeend",'<div class="print-page"><div class="print-inner">'+html+"</div></div>");
     });
     document.body.appendChild(pa);
+  }
+
+  /* =====================================================================
+     MENU LATERAL E BUSCA
+     ===================================================================== */
+  function renderSidebar(query) {
+    var list = document.getElementById("s-list");
+    if (!list) return;
+    var q = (query || "").toLowerCase().trim();
+    
+    var html = "";
+    sidebarData.forEach(function(item) {
+      if (q && item.tipo === 'eixo') return; // Esconde títulos de eixo ao buscar
+      if (q && item.tipo === 'capa') return; // Esconde capas ao buscar
+      
+      if (q && item.tipo === 'inst') {
+        if (item.tags.indexOf(q) === -1) return; // Filtro de busca
+      }
+      
+      if (item.tipo === 'eixo' && !q) {
+        html += '<div class="s-item eixo">' + E(item.nome) + '</div>';
+      } else if (item.tipo === 'capa' && !q) {
+        html += '<div class="s-item" onclick="RedeApp.goToSpread(' + item.spread + ')"><span class="nm">' + E(item.nome) + '</span></div>';
+      } else if (item.tipo === 'inst') {
+        html += '<div class="s-item" onclick="RedeApp.goToSpread(' + item.spread + ')"><span class="nm">' + E(item.nome) + '</span><span class="sub">' + E(item.sub) + '</span></div>';
+      }
+    });
+    
+    if(html === "") {
+       html = '<div style="padding:20px; text-align:center; color:#8a7f6c; font-size:12px;">Nenhuma unidade encontrada.</div>';
+    }
+    list.innerHTML = html;
+  }
+  
+  function ligarSidebar() {
+    var input = document.getElementById("s-input");
+    if(input) {
+      input.addEventListener("input", function(e) { renderSidebar(e.target.value); });
+    }
+    
+    var btn = document.getElementById("menu-btn");
+    var sidebar = document.getElementById("sidebar");
+    var close = document.getElementById("sidebar-close");
+    
+    if(btn && sidebar) btn.onclick = function() { sidebar.classList.add("open"); };
+    if(close && sidebar) close.onclick = function() { sidebar.classList.remove("open"); };
+    
+    // Auto-fechar o menu em celulares após clicar em uma página
+    document.getElementById("s-list").addEventListener("click", function(e) {
+       if(e.target.closest(".s-item:not(.eixo)")) {
+          if(window.innerWidth <= 860 && sidebar) sidebar.classList.remove("open");
+       }
+    });
   }
 
   /* =====================================================================
@@ -280,7 +380,6 @@
     });
   }
 
-  // Reseta os campos de texto do formulário
   function limparCampos() {
     document.getElementById("f-nome-inst").value = "";
     document.getElementById("f-endereco").value = "";
@@ -291,12 +390,8 @@
     document.getElementById("f-foto").value = "";
   }
 
-  // Preenche os campos com os dados atuais da instituição escolhida
   function preencherCamposEdicao(instId) {
-    if (!instId || !catalogoAtual) {
-      limparCampos();
-      return;
-    }
+    if (!instId || !catalogoAtual) { limparCampos(); return; }
     var inst = catalogoAtual.instituicoes.find(function(i) { return i.id === instId; });
     if (inst) {
       document.getElementById("f-nome-inst").value = inst.nome || "";
@@ -305,7 +400,7 @@
       document.getElementById("f-whatsapp").value = inst.whatsapp || "";
       document.getElementById("f-email").value = inst.email || "";
       document.getElementById("f-obs").value = "";
-      document.getElementById("f-foto").value = ""; // Input de arquivo não pode ser preenchido por segurança
+      document.getElementById("f-foto").value = ""; 
     } else {
       limparCampos();
     }
@@ -317,11 +412,8 @@
     document.getElementById("success-view").style.display="none";
     
     var s=document.getElementById("f-inst"); 
-    if(prefId && s){ 
-      s.value=prefId; 
-    }
+    if(prefId && s) s.value=prefId; 
     
-    // Dispara o evento de "change" no tipo para arrumar a exibição dos campos e puxar dados
     var selTipo = document.getElementById("f-tipo");
     if(selTipo) selTipo.dispatchEvent(new Event("change"));
 
@@ -352,7 +444,6 @@
     btn.disabled = true; btn.textContent = "Processando e enviando...";
 
     try {
-      // Processar a foto (se houver)
       var fotoBase64 = "";
       if (fileInput && fileInput.files && fileInput.files[0]) {
         fotoBase64 = await Store.comprimirImagem(fileInput.files[0], 1000, 0.72);
@@ -360,7 +451,7 @@
 
       var pedido = {
         id: Store.idUnico("req"),
-        tipo: tipo, // "edit", "add" ou "del"
+        tipo: tipo, 
         instituicaoId: (tipo === "add") ? Store.idUnico("inst") : instId,
         criadoEm: new Date().toISOString(),
         observacao: obs,
@@ -369,21 +460,17 @@
         campos: {}
       };
 
-      // Recupera o objeto atual para só enviar o que REALMENTE mudou (na edição)
       var objAtual = null;
       if (tipo === "edit") {
         objAtual = catalogoAtual.instituicoes.find(function(i) { return i.id === instId; }) || {};
       }
 
-      // Função ajudante para gravar no pedido apenas campos modificados
       var addCampoSeMudou = function(chave, novoValor) {
         if (tipo === "add") {
           pedido.campos[chave] = novoValor;
         } else if (tipo === "edit") {
           var valorAntigo = objAtual[chave] || "";
-          if (novoValor !== valorAntigo) {
-            pedido.campos[chave] = novoValor;
-          }
+          if (novoValor !== valorAntigo) pedido.campos[chave] = novoValor;
         }
       };
 
@@ -393,33 +480,24 @@
         addCampoSeMudou("telefone", telefone);
         addCampoSeMudou("whatsapp", whatsapp);
         addCampoSeMudou("email", email);
-        if (fotoBase64) pedido.campos.foto = fotoBase64; // Foto sempre vai se tiver sido escolhida uma nova
+        if (fotoBase64) pedido.campos.foto = fotoBase64; 
         if (tipo === "add") pedido.campos.eixo = eixo;
       }
 
-      // Se é edição, não enviou foto nova, os campos não mudaram e não tem observação: barrar.
       if (tipo === "edit" && Object.keys(pedido.campos).length === 0 && !obs) {
         alert("Nenhuma alteração foi feita em relação aos dados atuais.");
         btn.disabled = false; btn.textContent = "Enviar formulário";
         return;
       }
 
-      // ==== LÓGICA DE APROVAÇÃO AUTOMÁTICA POR DATA ====
       var hoje = new Date();
-      // Ajusta para o fuso horário local e extrai formato YYYY-MM-DD
-      var dataStr = hoje.getFullYear() + "-" + 
-                    String(hoje.getMonth() + 1).padStart(2, '0') + "-" + 
-                    String(hoje.getDate()).padStart(2, '0');
-      
+      var dataStr = hoje.getFullYear() + "-" + String(hoje.getMonth() + 1).padStart(2, '0') + "-" + String(hoje.getDate()).padStart(2, '0');
       var ehPeriodoEspecial = (dataStr >= "2026-06-24" && dataStr <= "2026-07-01");
       var ehPrimeiroDeJan = (dataStr.endsWith("-01-01"));
-      
       var aprovarAutomatico = ehPeriodoEspecial || ehPrimeiroDeJan;
 
       if (aprovarAutomatico) {
-        // Altera o catálogo oficial direto
         var cat = await Store.getCatalogo();
-        
         if (tipo === "add") {
           cat.instituicoes.push({
             id: pedido.instituicaoId,
@@ -446,14 +524,12 @@
         location.reload();
 
       } else {
-        // Manda para a caixa de pendentes do Painel de Controle
         pedido.status = "pendente";
         await Store.addPedido(pedido);
-
         fecharForm();
         document.getElementById("form-view").style.display = "none";
         document.getElementById("success-view").style.display = "block";
-        abrirForm(); // Reabre na aba de sucesso
+        abrirForm(); 
       }
     } catch (e) {
       console.error(e);
@@ -471,7 +547,6 @@
     if(byId("success-close")) byId("success-close").onclick=fecharForm;
     document.addEventListener("keydown",function(e){ if(e.key==="Escape") fecharForm(); });
     
-    // --- LÓGICA PARA MOSTRAR/ESCONDER E PREENCHER CAMPOS ---
     var selTipo = byId("f-tipo");
     var selInst = byId("f-inst");
 
@@ -491,16 +566,12 @@
       });
     }
 
-    // Se o usuário trocar a instituição no menu, recarrega os dados dela
     if(selInst) {
       selInst.addEventListener("change", function() {
-        if (selTipo && selTipo.value === "edit") {
-          preencherCamposEdicao(selInst.value);
-        }
+        if (selTipo && selTipo.value === "edit") preencherCamposEdicao(selInst.value);
       });
     }
 
-    // abre o form se a URL terminar em #atualizar
     if(location.hash==="#atualizar") setTimeout(function(){abrirForm();},400);
   }
 
@@ -524,27 +595,31 @@
   }
 
   async function iniciar(){
-    ligarForm(); ligarPDF();
+    ligarForm(); ligarPDF(); ligarSidebar();
     if(!C.CATALOGO_GIST_ID || C.CATALOGO_GIST_ID.length < 10){
       erro('<b>Configuração pendente.</b><br>Abra o <code>config.js</code> e cole o ID do seu Gist do catálogo.');
       return;
     }
     try{
       catalogoAtual = await Store.getCatalogo();
-      if(!catalogoAtual || !Array.isArray(catalogoAtual.instituicoes))
-        throw new Error("Formato inesperado");
+      if(!catalogoAtual || !Array.isArray(catalogoAtual.instituicoes)) throw new Error("Formato inesperado");
       preencherSelect();
       var pages = montar(catalogoAtual);
       var copia = pages.slice();
       construir(pages);
       construirImpressao(copia);
+      
+      // Renderiza o menu lateral na inicialização (sem filtro = exibe tudo)
+      renderSidebar("");
     }catch(e){
       erro('<b>Não foi possível carregar os dados.</b><br>Verifique o ID do Gist no <code>config.js</code> e sua conexão.<br><span style="font-size:11px;opacity:.7">('+E(e.message||e)+')</span>');
     }
   }
 
-  // expõe para abertura via outras telas, se necessário
-  window.RedeApp = { abrirForm: abrirForm };
+  window.RedeApp = { 
+    abrirForm: abrirForm,
+    goToSpread: goToSpread 
+  };
 
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", iniciar);
   else iniciar();
