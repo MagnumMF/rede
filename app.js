@@ -397,16 +397,7 @@
     }
   }
 
-  function ligarForm(){
-    var byId=function(id){return document.getElementById(id);};
-    if(byId("f-enviar")) byId("f-enviar").onclick=enviarForm;
-    if(byId("overlay-close")) byId("overlay-close").onclick=fecharForm;
-    if(byId("overlay")) byId("overlay").addEventListener("click",function(e){ if(e.target.id==="overlay") fecharForm(); });
-    if(byId("success-close")) byId("success-close").onclick=fecharForm;
-    document.addEventListener("keydown",function(e){ if(e.key==="Escape") fecharForm(); });
-    // abre o form se a URL terminar em #atualizar
-    if(location.hash==="#atualizar") setTimeout(function(){abrirForm();},400);
-  }
+ function ligarForm(){
 
   /* ---------------- botão Baixar PDF ---------------- */
   function ligarPDF(){
