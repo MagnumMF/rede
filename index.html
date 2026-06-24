@@ -16,10 +16,32 @@
 </head>
 <body>
 
+<!-- MENU LATERAL COM BUSCA -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <h2>Sumário</h2>
+    <button id="sidebar-close" class="sidebar-close" aria-label="Fechar menu">×</button>
+  </div>
+  <div class="sidebar-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="s-input" placeholder="Buscar unidade..." autocomplete="off">
+  </div>
+  <div class="sidebar-body" id="s-list">
+    <!-- Lista será injetada dinamicamente pelo app.js -->
+  </div>
+</aside>
+
+<!-- BARRA SUPERIOR -->
 <div class="topbar">
-  <div>
-    <h1>Guia da <b>Rede de Proteção</b> Integral à Infância e à Adolescência</h1>
-    <p>Quem é quem, onde encontrar e como acionar cada serviço. Toque nas laterais ou nas setas para folhear.</p>
+  <div class="tb-left" style="display: flex; gap: 14px; align-items: flex-start;">
+    <!-- Botão de abrir menu no Mobile -->
+    <button class="menu-btn" id="menu-btn" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <h1>Guia da <b>Rede de Proteção</b> Integral à Infância e à Adolescência</h1>
+      <p>Quem é quem, onde encontrar e como acionar cada serviço. Toque nas laterais ou nas setas para folhear.</p>
+    </div>
   </div>
   <div class="tb-right">
     <div class="tb-actions">
@@ -32,6 +54,7 @@
   </div>
 </div>
 
+<!-- ÁREA DO LIVRO -->
 <div class="stage">
   <div class="scaler" id="scaler">
     <div class="scene">
@@ -59,7 +82,7 @@
 
 <div class="hint"><kbd>←</kbd> <kbd>→</kbd> para folhear · toque nas laterais da página</div>
 
-<!-- ===================== FORMULÁRIO DE ATUALIZAÇÃO ===================== -->
+<!-- FORMULÁRIO DE ATUALIZAÇÃO -->
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
   <div class="sheet">
     <div class="sheet-head">
@@ -70,8 +93,6 @@
     </div>
 
     <div class="sheet-body">
-      
-      <!-- Visão do Formulário -->
       <div id="form-view">
         <div class="field">
           <label for="f-tipo">O que você deseja fazer?</label>
@@ -148,7 +169,6 @@
         <div class="form-msg" id="form-msg"></div>
       </div>
 
-      <!-- Visão de Sucesso -->
       <div id="success-view" style="display:none">
         <div class="success-box">
           <div class="check">
@@ -159,7 +179,6 @@
           <button class="btn-primary" id="success-close" type="button" style="margin-top:16px">Fechar</button>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -168,7 +187,6 @@
 <script src="store.js"></script>
 <script src="app.js"></script>
 <script>
-/* registro do Service Worker (PWA) — só funciona em HTTPS ou localhost */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker.register("service-worker.js").catch(function(){});
