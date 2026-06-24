@@ -12,8 +12,8 @@
     ct: "Conselho Tutelar", just: "Sistema de Justiça"
   };
   var CAMPO_LABEL = {
-    endereco: "Endereço", telefone: "Telefone", whatsapp: "WhatsApp",
-    email: "E-mail"
+    nome: "Nome", endereco: "Endereço", telefone: "Telefone", 
+    whatsapp: "WhatsApp", email: "E-mail", eixo: "Eixo", foto: "Foto"
   };
 
   var catalogo = null, caixa = null, abaAtual = "inst";
@@ -309,43 +309,80 @@
     var o = getInst(p.instituicaoId) || {};
     var quando = "";
     try { quando = new Date(p.criadoEm).toLocaleString("pt-BR"); } catch (e) { quando = p.criadoEm; }
-    var diff = Object.keys(p.campos || {}).map(function (k) {
-      var atual = o[k] || "(vazio)";
-      return '<div class="diff-row"><span class="k">' + (CAMPO_LABEL[k] || k) + '</span>' +
-        '<span class="old">' + E(atual) + '</span><span class="arrow">→</span>' +
-        '<span class="new">' + E(p.campos[k]) + '</span></div>';
-    }).join("");
+    
+    // Lógica para tipo de ação:
+    var badge = '<span class="pill" style="background:#3b6ea5">EDIÇÃO</span>';
+    if(p.tipo === "add") badge = '<span class="pill" style="background:#1f8a55">NOVA UNIDADE</span>';
+    if(p.tipo === "del") badge = '<span class="pill" style="background:#a23a4a">EXCLUIR</span>';
+
+    var diff = "";
+    if (p.tipo === "del") {
+      diff = '<div class="req-meta" style="color:#a23a4a;font-weight:bold">Solicitação de Exclusão Completa desta unidade.</div>';
+    } else {
+      diff = Object.keys(p.campos || {}).map(function (k) {
+        var atual = o[k] || "(vazio)";
+        if(k==="foto") return '<div class="diff-row"><i>[Foto atualizada no pedido]</i></div>';
+        return '<div class="diff-row"><span class="k">' + (CAMPO_LABEL[k] || k) + '</span>' +
+          '<span class="old">' + (p.tipo==="add" ? "—" : E(atual)) + '</span><span class="arrow">→</span>' +
+          '<span class="new">' + E(p.campos[k]) + '</span></div>';
+      }).join("");
+    }
+
     var obs = p.observacao ? '<div class="req-obs">“' + E(p.observacao) + '”</div>' : "";
     var autor = (p.autorNome || p.autorContato)
       ? '<div class="req-meta">Enviado por: ' + E(p.autorNome || "—") + (p.autorContato ? (" · " + E(p.autorContato)) : "") + '</div>'
       : '<div class="req-meta">Enviado anonimamente</div>';
+
+    var nomePainel = p.tipo === "add" ? (p.campos.nome || "Nova Inst.") : (o.nome || p.instituicaoId);
+
     return '<div class="req" data-id="' + p.id + '">' +
-      '<div class="req-head"><h3>' + E(p.instituicaoNome || o.nome || p.instituicaoId) + '</h3>' +
+      '<div class="req-head"><h3>' + badge + ' ' + E(nomePainel) + '</h3>' +
       '<span class="when">' + E(quando) + '</span></div>' +
       autor +
-      (diff ? '<div class="diff">' + diff + '</div>' : '<div class="req-meta">Sem campos — apenas observação.</div>') +
+      (diff ? '<div class="diff">' + diff + '</div>' : '<div class="req-meta">Sem campos alterados.</div>') +
       obs +
       '<div class="req-actions">' +
-      '<button class="btn-aplicar" data-act="aplicar">Aplicar e publicar</button>' +
+      '<button class="btn-aplicar" data-act="aplicar">Aprovar e publicar</button>' +
       '<button class="btn-rejeitar" data-act="rejeitar">Rejeitar</button>' +
       '</div></div>';
   }
 
   async function aplicar(reqId) {
     var p = (caixa.pedidos || []).find(function (x) { return x.id === reqId; }); if (!p) return;
-    var o = getInst(p.instituicaoId);
-    if (!o) { toast("A instituição deste pedido não existe mais.", true); return resolver(reqId); }
     
-    // Aplica as mudanças no objeto local
-    Object.keys(p.campos || {}).forEach(function (k) { o[k] = p.campos[k]; });
+    if (p.tipo === "add") {
+      catalogo.instituicoes.push({
+        id: p.instituicaoId,
+        eixo: p.campos.eixo || "social",
+        ordem: 99,
+        rh: "Nova",
+        kicker: "",
+        nome: p.campos.nome,
+        endereco: p.campos.endereco || "",
+        telefone: p.campos.telefone || "",
+        whatsapp: p.campos.whatsapp || "",
+        email: p.campos.email || "",
+        foto: p.campos.foto || ""
+      });
+    } else if (p.tipo === "del") {
+      catalogo.instituicoes = catalogo.instituicoes.filter(function(i) { return i.id !== p.instituicaoId; });
+    } else {
+      // É uma edição (edit)
+      var o = getInst(p.instituicaoId);
+      if (!o) { toast("A instituição deste pedido não existe mais.", true); return resolver(reqId); }
+      Object.keys(p.campos || {}).forEach(function (k) { o[k] = p.campos[k]; });
+    }
     
+    var btn = document.querySelector('.req[data-id="'+reqId+'"] .btn-aplicar');
+    if(btn){ btn.disabled = true; btn.textContent = "Publicando..."; }
+
     try {
       await Store.putCatalogo(catalogo);     // Salva catálogo via Proxy
       await resolver(reqId);                 // Remove da caixa de entrada
       atualizarMedidor(); 
       renderAbas(); 
       render();
-      toast("Atualização publicada em " + o.nome + ".");
+      toast("Ação concluída e publicada no guia.");
     } catch (e) { toast("Falha ao publicar. Tente novamente.", true); }
   }
 
