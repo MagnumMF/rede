@@ -69,8 +69,6 @@
       return '<div class="crow">'+icon+'<div>'+inner+'</div></div>';
     }
 
-    // Só mostra as linhas de contato que existem (instituições podem ter
-    // apenas o nome, sem endereço/telefone/WhatsApp/e-mail).
     var rows = [];
     if(has(o.endereco)) rows.push(crow(I.pin, '<span class="val">'+E(o.endereco)+'</span>'));
     if(has(o.telefone)) rows.push(crow(I.phone, '<span class="lbl">Tel.</span> '+telField(o.telefone)));
@@ -192,7 +190,7 @@
   }
 
   /* =====================================================================
-     MECÂNICA DO LIVRO (preservada do esboço original)
+     MECÂNICA DO LIVRO
      ===================================================================== */
   var book, papers, N, numPapers, current = 1, max;
 
@@ -243,7 +241,7 @@
     document.addEventListener("keydown",function(e){ if(e.key==="ArrowRight")next(); if(e.key==="ArrowLeft")prev(); });
     book.addEventListener("click",function(e){
       if (e.target.closest("[data-open-form]")){ e.stopPropagation(); abrirForm(); return; }
-      if (e.target.closest("a")) return;            // não vira página ao tocar em link
+      if (e.target.closest("a")) return;
       var r=book.getBoundingClientRect();
       if (e.clientX > r.left + r.width/2) next(); else prev();
     });
@@ -281,13 +279,20 @@
       sel.appendChild(op);
     });
   }
+
   function abrirForm(prefId){
     var ov=document.getElementById("overlay"); if(!ov) return;
     document.getElementById("form-view").style.display="block";
     document.getElementById("success-view").style.display="none";
     if(prefId){ var s=document.getElementById("f-inst"); if(s) s.value=prefId; }
+    
+    // Dispara o evento de "change" no tipo para arrumar a exibição dos campos
+    var selTipo = document.getElementById("f-tipo");
+    if(selTipo) selTipo.dispatchEvent(new Event("change"));
+
     ov.classList.add("open"); document.body.style.overflow="hidden";
   }
+
   function fecharForm(){
     var ov=document.getElementById("overlay"); if(!ov) return;
     ov.classList.remove("open"); document.body.style.overflow="";
@@ -314,7 +319,7 @@
     try {
       // Processar a foto (se houver)
       var fotoBase64 = "";
-      if (fileInput.files && fileInput.files[0]) {
+      if (fileInput && fileInput.files && fileInput.files[0]) {
         fotoBase64 = await Store.comprimirImagem(fileInput.files[0], 1000, 0.72);
       }
 
@@ -345,6 +350,7 @@
       var dataStr = hoje.getFullYear() + "-" + 
                     String(hoje.getMonth() + 1).padStart(2, '0') + "-" + 
                     String(hoje.getDate()).padStart(2, '0');
+      
       var ehPeriodoEspecial = (dataStr >= "2026-06-24" && dataStr <= "2026-07-01");
       var ehPrimeiroDeJan = (dataStr.endsWith("-01-01"));
       
@@ -397,7 +403,28 @@
     }
   }
 
- function ligarForm(){
+  function ligarForm(){
+    var byId=function(id){return document.getElementById(id);};
+    if(byId("f-enviar")) byId("f-enviar").onclick=enviarForm;
+    if(byId("overlay-close")) byId("overlay-close").onclick=fecharForm;
+    if(byId("overlay")) byId("overlay").addEventListener("click",function(e){ if(e.target.id==="overlay") fecharForm(); });
+    if(byId("success-close")) byId("success-close").onclick=fecharForm;
+    document.addEventListener("keydown",function(e){ if(e.key==="Escape") fecharForm(); });
+    
+    // --- LÓGICA NOVA PARA MOSTRAR/ESCONDER CAMPOS ---
+    var selTipo = byId("f-tipo");
+    if(selTipo) {
+      selTipo.addEventListener("change", function() {
+        var v = selTipo.value;
+        byId("box-inst").style.display = (v === "add") ? "none" : "block";
+        byId("box-eixo").style.display = (v === "add") ? "block" : "none";
+        byId("box-campos-dados").style.display = (v === "del") ? "none" : "block";
+      });
+    }
+
+    // abre o form se a URL terminar em #atualizar
+    if(location.hash==="#atualizar") setTimeout(function(){abrirForm();},400);
+  }
 
   /* ---------------- botão Baixar PDF ---------------- */
   function ligarPDF(){
@@ -418,9 +445,8 @@
     st.innerHTML='<div class="loading err">'+html+'</div>';
   }
 
-async function iniciar(){
+  async function iniciar(){
     ligarForm(); ligarPDF();
-    // NOVA VERIFICAÇÃO PARA GIST
     if(!C.CATALOGO_GIST_ID || C.CATALOGO_GIST_ID.length < 10){
       erro('<b>Configuração pendente.</b><br>Abra o <code>config.js</code> e cole o ID do seu Gist do catálogo.');
       return;
