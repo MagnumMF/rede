@@ -361,10 +361,11 @@
     st.innerHTML='<div class="loading err">'+html+'</div>';
   }
 
-  async function iniciar(){
+async function iniciar(){
     ligarForm(); ligarPDF();
-    if(!C.CATALOGO_URL || C.CATALOGO_URL.indexOf("COLE_AQUI")>-1){
-      erro('<b>Configuração pendente.</b><br>Abra <code>config.js</code> e cole a URL do seu blob do catálogo.<br>Veja o passo a passo no LEIA-ME.md.');
+    // NOVA VERIFICAÇÃO PARA GIST
+    if(!C.CATALOGO_GIST_ID || C.CATALOGO_GIST_ID.length < 10){
+      erro('<b>Configuração pendente.</b><br>Abra o <code>config.js</code> e cole o ID do seu Gist do catálogo.');
       return;
     }
     try{
@@ -373,11 +374,11 @@
         throw new Error("Formato inesperado");
       preencherSelect();
       var pages = montar(catalogoAtual);
-      var copia = pages.slice();           // cópia para impressão (antes do filler)
+      var copia = pages.slice();
       construir(pages);
       construirImpressao(copia);
     }catch(e){
-      erro('<b>Não foi possível carregar os dados.</b><br>Verifique a URL do catálogo no <code>config.js</code> e sua conexão.<br><span style="font-size:11px;opacity:.7">('+E(e.message||e)+')</span>');
+      erro('<b>Não foi possível carregar os dados.</b><br>Verifique o ID do Gist no <code>config.js</code> e sua conexão.<br><span style="font-size:11px;opacity:.7">('+E(e.message||e)+')</span>');
     }
   }
 
