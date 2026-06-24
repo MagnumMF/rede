@@ -22,7 +22,7 @@
   var EIXOS = [
     { id:"social", n:1, kicker:"SUAS", titulo:"Assistência Social",
       body:"A porta de entrada para famílias em situação de vulnerabilidade e a referência quando direitos já foram violados.",
-      units:["CRAS","CREAS","Acolhimento Institucional"] },
+      units:["Sec. de Assistência Social","CRAS","CREAS","Acolhimento"] },
     { id:"saude", n:2, kicker:"SUS", titulo:"Saúde",
       body:"Do cuidado no território à saúde mental: a saúde é, muitas vezes, a primeira a perceber sinais de risco.",
       units:["Sec. de Saúde","UBS / ACS","CAPS"] },
@@ -57,17 +57,27 @@
 
   function card(o){
     var eixo = o.eixo;
-    var addr = has(o.endereco) ? '<span class="val">'+E(o.endereco)+'</span>' : fill(14);
-    var tel  = has(o.telefone)
-      ? '<a href="tel:'+E(soDigitos(o.telefone))+'">'+E(o.telefone)+'</a>'
-      : '(49) '+fill(4)+'-'+fill(4);
-    var wa   = has(o.whatsapp)
-      ? '<a href="https://wa.me/55'+soDigitos(o.whatsapp)+'" target="_blank" rel="noopener">'+E(o.whatsapp)+'</a>'
-      : '(49) '+fill(5)+'-'+fill(4);
-    var mail = has(o.email)
-      ? '<a href="mailto:'+E(o.email)+'">'+E(o.email)+'</a>'
-      : fill(8)+'@saojoaquim.sc.gov.br';
-    var diss = has(o.disseminador) ? '<span class="val">'+E(o.disseminador)+'</span>' : fill(12);
+
+    // Renderiza um ou mais telefones (separados por ; ou ·) como links tel:.
+    function telField(v){
+      return String(v).split(/[;·]/).map(function(s){ return s.trim(); })
+        .filter(Boolean)
+        .map(function(n){ return '<a href="tel:'+E(soDigitos(n))+'">'+E(n)+'</a>'; })
+        .join(" · ");
+    }
+    function crow(icon, inner){
+      return '<div class="crow">'+icon+'<div>'+inner+'</div></div>';
+    }
+
+    // Só mostra as linhas de contato que existem (instituições podem ter
+    // apenas o nome, sem endereço/telefone/WhatsApp/e-mail).
+    var rows = [];
+    if(has(o.endereco)) rows.push(crow(I.pin, '<span class="val">'+E(o.endereco)+'</span>'));
+    if(has(o.telefone)) rows.push(crow(I.phone, '<span class="lbl">Tel.</span> '+telField(o.telefone)));
+    if(has(o.whatsapp)) rows.push(crow(I.wa, '<span class="lbl">WhatsApp</span> <a href="https://wa.me/55'+soDigitos(o.whatsapp)+'" target="_blank" rel="noopener">'+E(o.whatsapp)+'</a>'));
+    if(has(o.email))    rows.push(crow(I.mail, '<a href="mailto:'+E(o.email)+'">'+E(o.email)+'</a>'));
+    var contactsHtml = rows.length ? '<div class="contacts">'+rows.join("")+'</div>' : '';
+
     var photo = has(o.foto)
       ? '<div class="photo has-img" style="background-image:url(\''+cssUrl(o.foto)+'\')"></div>'
       : '<div class="photo">'+I.bld+'<span>Foto da sede</span></div>';
@@ -78,13 +88,7 @@
       '<h2 class="card-t">'+E(o.nome)+'</h2>'+
       '<div class="sub-t">'+E(o.sub)+'</div>'+
       photo+
-      '<div class="contacts">'+
-        '<div class="crow">'+I.pin+'<div>'+addr+'</div></div>'+
-        '<div class="crow">'+I.phone+'<div><span class="lbl">Tel.</span> '+tel+'</div></div>'+
-        '<div class="crow">'+I.wa+'<div><span class="lbl">WhatsApp</span> '+wa+'</div></div>'+
-        '<div class="crow">'+I.mail+'<div>'+mail+'</div></div>'+
-        '<div class="crow">'+I.user+'<div><span class="lbl">Disseminador(a):</span> '+diss+'</div></div>'+
-      '</div>'+
+      contactsHtml+
       '<div class="desc">'+(o.desc||"")+'</div>'+
     '</div>';
   }
@@ -110,7 +114,7 @@
       '<h2>Uma rede que se conhece protege melhor</h2>'+
       '<p>Proteger uma criança raramente é tarefa de um só órgão. A <b>proteção integral</b> só acontece quando saúde, educação, assistência social, Conselho Tutelar e sistema de justiça atuam de forma articulada.</p>'+
       '<p>Na prática, porém, a comunicação entre esses pontos esbarra na <b>rotatividade das equipes</b> e na falta de um cadastro atualizado de quem faz o quê e como falar com cada serviço.</p>'+
-      '<p>Este guia reúne, em um só lugar, <b>os componentes da rede</b>, seus endereços, contatos e um(a) disseminador(a) de referência — para que ninguém perca tempo procurando a porta certa quando uma criança precisa.</p>'+
+      '<p>Este guia reúne, em um só lugar, <b>os componentes da rede</b>, seus endereços e contatos — para que ninguém perca tempo procurando a porta certa quando uma criança precisa.</p>'+
       '<div class="sign">— Rede de Proteção · Comarca de São Joaquim</div>'+
     '</div>';
   }
@@ -296,7 +300,7 @@
     msg.className="form-msg"; msg.textContent="";
     if(!instId){ msg.className="form-msg bad"; msg.textContent="Escolha qual instituição você quer corrigir."; return; }
     var campos={};
-    ["endereco","telefone","whatsapp","email","disseminador"].forEach(function(k){
+    ["endereco","telefone","whatsapp","email"].forEach(function(k){
       var v=get("f-"+k); if(v) campos[k]=v;
     });
     var observacao=get("f-obs");
@@ -320,7 +324,7 @@
       await Store.addPedido(pedido);
       document.getElementById("form-view").style.display="none";
       document.getElementById("success-view").style.display="block";
-      ["f-endereco","f-telefone","f-whatsapp","f-email","f-disseminador","f-obs","f-nome","f-contato"].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=""; });
+      ["f-endereco","f-telefone","f-whatsapp","f-email","f-obs","f-nome","f-contato"].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=""; });
     }catch(e){
       msg.className="form-msg bad";
       msg.textContent="Não foi possível enviar agora. Verifique sua conexão e tente novamente.";
