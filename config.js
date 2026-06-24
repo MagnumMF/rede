@@ -24,7 +24,7 @@ window.CONFIG = {
   CAIXA_GIST_ID: "9ef265c19a55d1de928039bc936de0fb",
 
   /* O Token que você gerou no Passo 2 */
-  GITHUB_TOKEN: "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",
+  GITHUB_TOKEN: "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",
 
   /* Configurações visuais */
   APP_URL: "https://magnummf.github.io/rede/",
