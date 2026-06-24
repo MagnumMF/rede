@@ -19,25 +19,16 @@
    ===================================================================== */
 
 window.CONFIG = {
+  /* IDs dos Gists (aquela parte final da URL) */
+  CATALOGO_GIST_ID: "8a808b01b2f4f15dbc6999ec6c70c083",
+  CAIXA_GIST_ID: "9ef265c19a55d1de928039bc936de0fb",
 
-  /* URL DA API do blob do CATÁLOGO (dados públicos das instituições).
-     O app LÊ daqui; o painel de controle ESCREVE aqui. */
-  CATALOGO_URL: "https://api.jsonblob.com/019ec496-f338-7d8e-9708-e048091a7c86",
+  /* O Token que você gerou no Passo 2 */
+  GITHUB_TOKEN: "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",
 
-  /* URL DA API do blob da CAIXA DE ENTRADA (pedidos de atualização).
-     O formulário público ESCREVE aqui; o painel LÊ e limpa daqui. */
-  CAIXA_URL: "https://api.jsonblob.com/019ec499-3f94-7465-ab1e-cea28c292e3c",
-
-  /* Endereço público onde o app ficará hospedado.
-     Usado para gerar o QR Code da página de atualização. */
+  /* Configurações visuais */
   APP_URL: "https://magnummf.github.io/rede/",
-
-  /* Senha do painel de controle (admin.html).
-     ATENÇÃO: isto apenas ESCONDE a tela de administração no navegador.
-     Não é segurança real (veja a seção "Segurança" no LEIA-ME.md). */
   ADMIN_SENHA: "#infSJ01#",
-
-  /* Textos da capa/rodapé (opcional — já vêm preenchidos). */
   TITULO: "Guia da Rede de Proteção Integral à Infância e à Adolescência",
   MUNICIPIO: "São Joaquim · SC",
   COMARCA: "Comarca de São Joaquim · SC"
